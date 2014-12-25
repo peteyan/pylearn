@@ -6,8 +6,11 @@ import time
 import urllib2
 import random
 import os
-import logging  
+#import logging  
 
+"""
+多线程下载MP3
+"""
 
 limit = 17
 queue = Queue()
@@ -30,12 +33,14 @@ class DownloadMusic(threading.Thread):
             limit += 1
             return (limit-1) * 100
             
+    #数据库查询出要下载的MP3 url
     def getRows(self):
         lm = self._getLimit()
         print "________________%s________________" % lm
         sql = "SELECT * from fanwe_music where is_download=0 limit %s, 100 " % lm
         self.cursor.execute(sql)
         return self.cursor.fetchall()
+        
     # 获取MP3 文件流
     def get_content_by_proxy(self,url):
         #opener = urllib2.build_opener(urllib2.ProxyHandler({'http':'117.162.44.200:8123'}), urllib2.HTTPHandler(debuglevel=1)) #222.59.244.14:8118
@@ -69,6 +74,8 @@ class DownloadMusic(threading.Thread):
             if content:
                 with open(filepath,'wb') as code:
                     code.write(content)
+            else:
+                self.queue.put(queueRow)
             time.sleep(5)
             
     def run(self):
